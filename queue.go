@@ -23,6 +23,15 @@ func NewQueue(s int) *Queue {
 	return q
 }
 
+func (q *Queue) resize(n int) {
+	nodes := make([]interface{}, n)
+	copy(nodes, q.nodes[q.head:])
+	copy(nodes[len(q.nodes)-q.head:], q.nodes[:q.head])
+	q.head = 0
+	q.tail = len(q.nodes)
+	q.nodes = nodes
+}
+
 func (q Queue) String() string {
 	return fmt.Sprintf("Queue %v", q.nodes)
 }
@@ -33,12 +42,7 @@ func (q *Queue) Push(n interface{}) {
 	defer q.mutex.Unlock()
 
 	if q.head == q.tail && q.count > 0 {
-		nodes := make([]interface{}, len(q.nodes)+q.size)
-		copy(nodes, q.nodes[q.head:])
-		copy(nodes[len(q.nodes)-q.head:], q.nodes[:q.head])
-		q.head = 0
-		q.tail = len(q.nodes)
-		q.nodes = nodes
+		q.resize(len(q.nodes) + q.size)
 	}
 	q.nodes[q.tail] = n
 	q.tail = (q.tail + 1) % len(q.nodes)
@@ -58,6 +62,17 @@ func (q *Queue) Pop() interface{} {
 	q.head = (q.head + 1) % len(q.nodes)
 	q.count--
 	return node
+}
+
+func (q *Queue) Peek() interface{} {
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
+
+	if q.count == 0 {
+		return nil
+	}
+
+	return q.nodes[q.head]
 }
 
 func (q Queue) Len() int {

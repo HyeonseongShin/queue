@@ -29,6 +29,24 @@ func TestPush(t *testing.T) {
 	}
 }
 
+func TestPeek(t *testing.T) {
+	fh := NewQueue(1)
+
+	obj := 1
+
+	fh.Push(obj)
+
+	peekedObj := fh.Peek()
+
+	if peekedObj != 1 {
+		t.Errorf("Unexpected Result", peekedObj)
+	}
+
+	if fh.Len() != 1 {
+		t.Errorf("Unexpected Queue Len %v", fh.Len())
+	}
+}
+
 func TestPop(t *testing.T) {
 	fh := NewQueue(1)
 
